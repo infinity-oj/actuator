@@ -12,7 +12,7 @@ import (
 
 func work() {
 
-	task, err := taskManager.Fetch("builder/Clang")
+	task, err := taskManager.Fetch("executor/elf")
 	if task == nil {
 		return
 	}
@@ -63,8 +63,8 @@ func work() {
 
 	stdOut, err := ioutil.ReadFile("stdout")
 	stdErr, err := ioutil.ReadFile("stderr")
-	fmt.Println(stdOut)
-	fmt.Println(stdErr)
+	fmt.Println(string(stdOut))
+	fmt.Println(string(stdErr))
 
 	task.Outputs = [][]byte{stdOut}
 
