@@ -131,7 +131,7 @@ func (task *Task) Push() error {
 			Token   string `json:"token"`
 			Outputs string `json:"outputs"`
 		}{
-			task.Type,
+			task.Token,
 			crypto.EasyEncode(task.Outputs),
 		}).
 		Put(url)
