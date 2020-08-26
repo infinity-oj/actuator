@@ -1,10 +1,10 @@
 .PHONY: clean
 clean:
-	- rm actuator
+	- rm builder
 	- rm executor
 
-actuator: clean
-	go build -o actuator ./cmd/actuator
+builder: clean
+	go build -o builder ./cmd/builder
 
 executor: clean
 	go build -o executor ./cmd/executor
