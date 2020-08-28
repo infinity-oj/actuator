@@ -26,7 +26,7 @@ func work(taskManager taskManager.TaskManager) {
 		return
 	}
 
-	log.Printf("Get task, task id:", task.TaskId)
+	log.Printf("Get task, task id: %s", task.TaskId)
 
 	if err := ioutil.WriteFile("main.cpp", task.Inputs[0], 0644); err != nil {
 		log.Fatal(err)
