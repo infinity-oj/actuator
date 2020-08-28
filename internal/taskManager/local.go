@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 )
 
-type LocalTaskManager struct {
+type localTaskManager struct {
 	path  string
 	queue []Task
 }
 
-func (l *LocalTaskManager) init() {
+func (l *localTaskManager) init() {
 	if l.queue != nil {
 		return
 	}
@@ -33,7 +33,7 @@ func (l *LocalTaskManager) init() {
 	}
 }
 
-func (l *LocalTaskManager) Fetch(tp string) (*Task, error) {
+func (l *localTaskManager) Fetch(tp string) (*Task, error) {
 	l.init()
 	for _, task := range l.queue {
 		if task.Type == tp {
@@ -43,10 +43,11 @@ func (l *LocalTaskManager) Fetch(tp string) (*Task, error) {
 	return nil, errors.New("no task to fetch in local task manager")
 }
 
-func (l LocalTaskManager) Reserve(_ *Task) error {
+func (l localTaskManager) Reserve(_ *Task) error {
 	return nil
 }
 
-func (l LocalTaskManager) Push(_ *Task) error {
+func (l localTaskManager) Push(_ *Task) error {
 	return nil
 }
+

@@ -9,18 +9,19 @@ import (
 	"github.com/infinity-oj/actuator/internal/crypto"
 )
 
-type NetTaskManager struct {
-	URL string
+
+
+type remoteTaskManager struct {
+	client  *resty.Client
+	baseUrl string
 }
 
-func (n NetTaskManager) Reserve(task *Task) error {
-	client := resty.New()
-
+func (tm *remoteTaskManager) Reserve(task *Task) error {
 	url := fmt.Sprintf("%s/api/v1/task/%s/reservation",
-		n.URL,
+		tm.baseUrl,
 		task.TaskId)
 
-	resp, err := client.R().
+	resp, err := tm.client.R().
 		EnableTrace().
 		Post(url)
 
@@ -40,12 +41,10 @@ func (n NetTaskManager) Reserve(task *Task) error {
 	return nil
 }
 
-func (n NetTaskManager) Fetch(tp string) (*Task, error) {
-	client := resty.New()
+func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
+	url := fmt.Sprintf("%s/api/v1/task", tm.baseUrl)
 
-	url := fmt.Sprintf("%s/api/v1/task", n.URL)
-
-	resp, err := client.R().
+	resp, err := tm.client.R().
 		EnableTrace().
 		SetQueryParam("type", tp).
 		Get(url)
@@ -94,14 +93,12 @@ func (n NetTaskManager) Fetch(tp string) (*Task, error) {
 	return task, nil
 }
 
-func (n *NetTaskManager) Push(task *Task) error {
-	client := resty.New()
-
+func (tm *remoteTaskManager) Push(task *Task) error {
 	url := fmt.Sprintf("%s/api/v1/task/%s",
-		n.URL,
+		tm.baseUrl,
 		task.TaskId)
 
-	_, err := client.R().
+	_, err := tm.client.R().
 		EnableTrace().
 		SetBody(struct {
 			Token   string `json:"token"`
@@ -115,4 +112,11 @@ func (n *NetTaskManager) Push(task *Task) error {
 		return err
 	}
 	return nil
+}
+
+func NewRemoteManager(baseUrl string) TaskManager {
+	return &remoteTaskManager{
+		client:  resty.New(),
+		baseUrl: baseUrl,
+	}
 }

@@ -53,8 +53,9 @@ func work(taskManager taskManager.TaskManager) {
 }
 
 func main() {
+	tm := taskManager.NewRemoteManager("http://127.0.0.1:8888")
 	for {
-		work(&taskManager.NetTaskManager{URL: "127.0.0.1:8888"})
+		work(tm)
 		time.Sleep(time.Second)
 	}
 }
