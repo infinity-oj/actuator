@@ -5,7 +5,7 @@ import "time"
 type Task struct {
 	JudgementId string
 	TaskId      string
-	Token       string
+	token       string
 
 	Type       string
 	Properties map[string]string
