@@ -114,7 +114,7 @@ func (tm *remoteTaskManager) Push(task *Task) error {
 	return nil
 }
 
-func NewRemoteManager(baseUrl string) TaskManager {
+func NewRemoteTaskManager(baseUrl string) TaskManager {
 	return &remoteTaskManager{
 		client:  resty.New(),
 		baseUrl: baseUrl,

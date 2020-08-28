@@ -51,3 +51,9 @@ func (l localTaskManager) Push(_ *Task) error {
 	return nil
 }
 
+func NewLocalTaskManager() TaskManager {
+	return &localTaskManager{
+		path:  "",
+		queue: nil,
+	}
+}
