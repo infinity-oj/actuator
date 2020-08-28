@@ -5,29 +5,18 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/infinity-oj/actuator/internal/crypto"
-	"time"
 )
 
-const (
-	URL = "http://127.0.0.1:8888"
-)
-
-type Task struct {
-	JudgementId string
-	TaskId      string
-	Token       string
-
-	Type       string
-	Properties map[string]string
-	Inputs     [][]byte
-	Outputs    [][]byte
+type NetTaskManager struct {
+	URL string
 }
 
-func (task *Task) Reserve() error {
+
+func (n NetTaskManager) Reserve(task *Task) error {
 	client := resty.New()
 
 	url := fmt.Sprintf("%s/api/v1/task/%s/reservation",
-		URL,
+		n.URL,
 		task.TaskId)
 
 	resp, err := client.R().
@@ -50,10 +39,10 @@ func (task *Task) Reserve() error {
 	return nil
 }
 
-func Fetch(tp string) (*Task, error) {
+func (n NetTaskManager) Fetch(tp string) (*Task, error) {
 	client := resty.New()
 
-	url := fmt.Sprintf("%s/api/v1/task", URL)
+	url := fmt.Sprintf("%s/api/v1/task", n.URL)
 
 	resp, err := client.R().
 		EnableTrace().
@@ -68,21 +57,7 @@ func Fetch(tp string) (*Task, error) {
 		return nil, nil
 	}
 
-	var data []struct {
-		ID        uint64     `json:"id"`
-		CreatedAt time.Time  `json:"created_at"`
-		UpdatedAt time.Time  `json:"updated_at"`
-		DeletedAt *time.Time `json:"deleted_at"`
-
-		JudgementId string `json:"judgementId"`
-
-		TaskId string `json:"taskId"`
-
-		Type       string `json:"type"`
-		Properties string `json:"properties"`
-		Inputs     string `json:"inputs"`
-		Outputs    string `json:"outputs"`
-	}
+	var data []TaskResponse
 
 	if err := json.Unmarshal(resp.Body(), &data); err != nil {
 		return nil, err
@@ -118,11 +93,11 @@ func Fetch(tp string) (*Task, error) {
 	return task, nil
 }
 
-func (task *Task) Push() error {
+func (n *NetTaskManager) Push(task *Task) error {
 	client := resty.New()
 
 	url := fmt.Sprintf("%s/api/v1/task/%s",
-		URL,
+		n.URL,
 		task.TaskId)
 
 	_, err := client.R().

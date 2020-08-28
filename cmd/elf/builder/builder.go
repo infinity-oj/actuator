@@ -10,16 +10,16 @@ import (
 	"time"
 )
 
-func work() {
+func work(taskManager taskManager.TaskManager) {
 
-	task, err := taskManager.Fetch("builder/Clang")
+	var task, err = taskManager.Fetch("builder/Clang")
 	if task == nil {
 		return
 	}
 	fmt.Println(task.TaskId)
 	fmt.Println(err)
 
-	err = task.Reserve()
+	err = taskManager.Reserve(task)
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func work() {
 
 	task.Outputs = [][]byte{data}
 
-	err = task.Push()
+	err = taskManager.Push(task)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func work() {
 
 func main() {
 	for {
-		work()
+		work(&taskManager.NetTaskManager{URL: "127.0.0.1:8888"})
 		time.Sleep(time.Second)
 	}
 }
