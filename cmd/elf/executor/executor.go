@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/infinity-oj/actuator/internal/taskManager"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/infinity-oj/actuator/internal/taskManager"
 )
 
 func work() {

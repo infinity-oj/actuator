@@ -3,14 +3,15 @@ package taskManager
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/go-resty/resty/v2"
+
 	"github.com/infinity-oj/actuator/internal/crypto"
 )
 
 type NetTaskManager struct {
 	URL string
 }
-
 
 func (n NetTaskManager) Reserve(task *Task) error {
 	client := resty.New()
@@ -86,9 +87,9 @@ func (n NetTaskManager) Fetch(tp string) (*Task, error) {
 		Token:       "",
 		Type:        tmp.Type,
 
-		Properties:  properties,
-		Inputs:      inputs,
-		Outputs:     [][]byte{},
+		Properties: properties,
+		Inputs:     inputs,
+		Outputs:    [][]byte{},
 	}
 	return task, nil
 }

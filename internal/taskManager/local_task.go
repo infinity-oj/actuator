@@ -36,11 +36,11 @@ func (l *LocalTaskManager) init() {
 func (l *LocalTaskManager) Fetch(tp string) (*Task, error) {
 	l.init()
 	for _, task := range l.queue {
-	if task.Type == tp {
-		return &task, nil
+		if task.Type == tp {
+			return &task, nil
+		}
 	}
-}
-return nil, errors.New("no task to fetch in local task manager")
+	return nil, errors.New("no task to fetch in local task manager")
 }
 
 func (l LocalTaskManager) Reserve(_ *Task) error {
