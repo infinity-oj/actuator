@@ -13,7 +13,8 @@ import (
 
 func work(taskManager taskManager.TaskManager) {
 
-	var task, err = taskManager.Fetch("builder/Clang")
+	task, err := taskManager.Fetch("builder/Clang")
+
 	if task == nil {
 		return
 	}
