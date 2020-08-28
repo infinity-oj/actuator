@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/infinity-oj/actuator/internal/taskManager"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/infinity-oj/actuator/internal/taskManager"
 )
 
-func work() {
+func work(taskManager taskManager.TaskManager) {
 
 	task, err := taskManager.Fetch("executor/elf")
 	if task == nil {
@@ -19,7 +20,7 @@ func work() {
 	fmt.Println(task.TaskId)
 	fmt.Println(err)
 
-	err = task.Reserve()
+	err = taskManager.Reserve(task)
 	if err != nil {
 		return
 	}
@@ -68,7 +69,7 @@ func work() {
 
 	task.Outputs = [][]byte{stdOut}
 
-	err = task.Push()
+	err = taskManager.Push(task)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,8 +81,9 @@ func work() {
 }
 
 func main() {
+	tm := taskManager.NewRemoteManager("http://127.0.0.1:8888")
 	for {
-		work()
+		work(tm)
 		time.Sleep(time.Second)
 	}
 }
