@@ -9,8 +9,6 @@ import (
 	"github.com/infinity-oj/actuator/internal/crypto"
 )
 
-
-
 type remoteTaskManager struct {
 	client  *resty.Client
 	baseUrl string
@@ -37,7 +35,7 @@ func (tm *remoteTaskManager) Reserve(task *Task) error {
 		return err
 	}
 
-	task.Token = data.Token
+	task.token = data.Token
 	return nil
 }
 
@@ -83,7 +81,7 @@ func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
 	task := &Task{
 		JudgementId: tmp.JudgementId,
 		TaskId:      tmp.TaskId,
-		Token:       "",
+		token:       "",
 		Type:        tmp.Type,
 
 		Properties: properties,
@@ -104,7 +102,7 @@ func (tm *remoteTaskManager) Push(task *Task) error {
 			Token   string `json:"token"`
 			Outputs string `json:"outputs"`
 		}{
-			task.Token,
+			task.token,
 			crypto.EasyEncode(task.Outputs),
 		}).
 		Put(url)
@@ -114,7 +112,7 @@ func (tm *remoteTaskManager) Push(task *Task) error {
 	return nil
 }
 
-func NewRemoteManager(baseUrl string) TaskManager {
+func NewRemoteTaskManager(baseUrl string) TaskManager {
 	return &remoteTaskManager{
 		client:  resty.New(),
 		baseUrl: baseUrl,

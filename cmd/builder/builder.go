@@ -26,7 +26,7 @@ func work(taskManager taskManager.TaskManager) {
 		return
 	}
 
-	log.Printf("Get task, token: %s", task.Token)
+	log.Printf("Get task, task id: %s", task.TaskId)
 
 	if err := ioutil.WriteFile("main.cpp", task.Inputs[0], 0644); err != nil {
 		log.Fatal(err)
@@ -37,7 +37,7 @@ func work(taskManager taskManager.TaskManager) {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
-	// Run执行c包含的命令，并阻塞直到完成。  这里stdout被取出，cmd.Wait()无法正确获取stdin,stdout,stderr，则阻塞在那了
+	// Run执行c包含的命令，并阻塞直到完成。这里stdout被取出，cmd.Wait()无法正确获取stdin,stdout,stderr，则阻塞在那了
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func work(taskManager taskManager.TaskManager) {
 }
 
 func main() {
-	tm := taskManager.NewRemoteManager("http://127.0.0.1:8888")
+	tm := taskManager.NewRemoteTaskManager("http://127.0.0.1:8888")
 	for {
 		work(tm)
 		time.Sleep(time.Second)
