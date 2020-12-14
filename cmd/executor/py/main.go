@@ -16,7 +16,7 @@ import (
 
 func work(taskManager taskManager.TaskManager) {
 
-	task, err := taskManager.Fetch("executor/cs303")
+	task, err := taskManager.Fetch("executor/py")
 
 	if task == nil {
 		return
@@ -47,11 +47,14 @@ func work(taskManager taskManager.TaskManager) {
 		log.Fatal(err)
 	}
 
-	stdout, err := os.OpenFile("stdout", os.O_CREATE|os.O_RDWR, 0777)
+	stdout, err := ioutil.TempFile("", "stdout-*")
+	//stdout, err := os.OpenFile("stdout", os.O_CREATE|os.O_WRONLY, 0777)
+
 	if err != nil {
 		log.Fatalln(err)
 	}
-	stderr, err := os.OpenFile("stderr", os.O_CREATE|os.O_WRONLY, 0777)
+	//stderr, err := os.OpenFile("stderr", os.O_CREATE|os.O_WRONLY, 0777)
+	stderr, err := ioutil.TempFile("", "stderr-*")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -78,6 +81,9 @@ func work(taskManager taskManager.TaskManager) {
 		stdOut,
 		stdErr,
 	}
+
+	_ = os.Remove(stdout.Name())
+	_ = os.Remove(stderr.Name())
 
 	err = taskManager.Push(task)
 	if err != nil {
