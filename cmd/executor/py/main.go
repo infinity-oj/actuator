@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
+	"os/exec"
+	"path"
 	"time"
 
 	"github.com/infinity-oj/actuator/internal/volume"
@@ -29,30 +33,56 @@ func work(taskManager taskManager.TaskManager) {
 
 	vol := task.Properties["volume"]
 
-	_ = volume.DownloadVolume(vol, "./gg")
+	err = volume.DownloadVolume(vol, "./gg")
 
-	//if err := ioutil.WriteFile("main.cpp", task.Inputs[0], 0644); err != nil {
-	//	log.Fatal(err)
-	//}
-	//cmd := exec.Command("g++", "main.cpp", "-o", "main")
-	//
-	//// 读取io.Writer类型的cmd.Stdout，再通过bytes.Buffer(缓冲byte类型的缓冲器)将byte类型转化为string类型(out.String():这是bytes类型提供的接口)
-	//var out bytes.Buffer
-	//cmd.Stdout = &out
-	//
-	//if err := cmd.Run(); err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//data, err := ioutil.ReadFile("main")
-	//
-	//task.Outputs = [][]byte{data}
-	//
-	//err = taskManager.Push(task)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	if err != nil {
+		log.Fatal(err)
+	}
+	mainPath := path.Join(".", "gg", vol, "main.py")
+	fmt.Println(mainPath)
+	cmd := exec.Command("python", mainPath)
 
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stdout, err := os.OpenFile("stdout", os.O_CREATE|os.O_RDWR, 0777)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	stderr, err := os.OpenFile("stderr", os.O_CREATE|os.O_WRONLY, 0777)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+
+	err = cmd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmd.Wait()
+	stdin.Close()
+	stdout.Close()
+	stderr.Close()
+
+	stdOut, err := ioutil.ReadFile("stdout")
+	stdErr, err := ioutil.ReadFile("stderr")
+	fmt.Println(string(stdOut))
+	fmt.Println(string(stdErr))
+
+	task.Outputs = [][]byte{
+		stdOut,
+		stdErr,
+	}
+
+	err = taskManager.Push(task)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
