@@ -3,10 +3,9 @@ package taskManager
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
-
-	"github.com/infinity-oj/actuator/internal/crypto"
 )
 
 type remoteTaskManager struct {
@@ -73,11 +72,6 @@ func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
 		return nil, err
 	}
 
-	inputs, err := crypto.EasyDecode(tmp.Inputs)
-	if err != nil {
-		return nil, err
-	}
-
 	task := &Task{
 		JudgementId: tmp.JudgementId,
 		TaskId:      tmp.TaskId,
@@ -85,8 +79,8 @@ func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
 		Type:        tmp.Type,
 
 		Properties: properties,
-		Inputs:     inputs,
-		Outputs:    [][]byte{},
+		Inputs:     strings.Split(tmp.Inputs, ","),
+		Outputs:    "",
 	}
 	return task, nil
 }
@@ -103,7 +97,7 @@ func (tm *remoteTaskManager) Push(task *Task) error {
 			Outputs string `json:"outputs"`
 		}{
 			task.token,
-			crypto.EasyEncode(task.Outputs),
+			task.Outputs,
 		}).
 		Put(url)
 	if err != nil {

@@ -9,8 +9,8 @@ type Task struct {
 
 	Type       string
 	Properties map[string]string
-	Inputs     [][]byte
-	Outputs    [][]byte
+	Inputs     []string
+	Outputs    string
 }
 
 type TaskResponse struct {
