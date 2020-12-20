@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/infinity-oj/actuator/internal/environment"
-
 	"github.com/infinity-oj/actuator/internal/taskManager"
 )
 
@@ -22,7 +20,7 @@ func isExists(path string) bool {
 	return true
 }
 
-func work(env environment.Runtime, task *taskManager.Task) (warning, error string) {
+func work(env Runtime, task *taskManager.Task) (warning, error string) {
 	vol := task.Properties["volume"]
 	log.Printf("Download volume: %s", vol)
 
@@ -165,7 +163,7 @@ func main() {
 		}
 		log.Printf("task locked")
 
-		env := environment.New()
+		env := NewRuntime()
 		if err := env.Setup(task); err != nil {
 			log.Printf("setup env error %s", err)
 			continue

@@ -11,8 +11,6 @@ import (
 
 	"log"
 
-	"github.com/infinity-oj/actuator/internal/environment"
-
 	"github.com/infinity-oj/actuator/internal/taskManager"
 )
 
@@ -56,7 +54,7 @@ import (
 //	}
 //}
 
-func work(env environment.Runtime, task *taskManager.Task) (warning, error string) {
+func work(env Runtime, task *taskManager.Task) (warning, error string) {
 	vol := task.Inputs[0]
 
 	p, err := env.GetVolume(vol)
@@ -132,7 +130,7 @@ func main() {
 		}
 		log.Printf("task locked")
 
-		env := environment.New()
+		env := NewRuntime()
 		if err := env.Setup(task); err != nil {
 			log.Printf("setup env error %s", err)
 			continue

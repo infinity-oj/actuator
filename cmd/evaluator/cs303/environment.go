@@ -1,4 +1,4 @@
-package environment
+package main
 
 import (
 	"io/ioutil"
@@ -74,7 +74,7 @@ func (e runtime) NewCommand() {
 	panic("implement me")
 }
 
-func New() Runtime {
+func NewRuntime() Runtime {
 	return &runtime{
 		WorkingDir: "",
 		volumeMap:  make(map[string]string),
