@@ -16,7 +16,7 @@ func DownloadVolume(volume, path string) error {
 	if err != nil {
 		return err
 	}
-	err = DownloadFile(file.Name(), fmt.Sprintf("http://127.0.0.1:8888/api/v1/volume/%s/download?dirname=/", volume))
+	err = DownloadFile(file.Name(), fmt.Sprintf("http://10.20.107.171:2333/api/v1/volume/%s/download?dirname=/", volume))
 	if err != nil {
 		return err
 	}

@@ -167,7 +167,9 @@ func (tm *remoteTaskManager) Login(username, password string) error {
 	return nil
 }
 
-func (tm *remoteTaskManager) Push(task *Task) (err error) {
+func (tm *remoteTaskManager) Push(task *Task, warning, error string) (err error) {
+
+	fmt.Println("Error:", error)
 
 	if len(task.Outputs) == 1 {
 
@@ -176,9 +178,13 @@ func (tm *remoteTaskManager) Push(task *Task) (err error) {
 			SetBody(struct {
 				Token   string `json:"token"`
 				Outputs string `json:"outputs"`
+				Warning string `json:"warning"`
+				Error   string `json:"error"`
 			}{
 				task.token,
 				string(task.Outputs[0]),
+				warning,
+				error,
 			}).
 			Put(fmt.Sprintf("/task/%s", task.TaskId))
 
@@ -203,9 +209,13 @@ func (tm *remoteTaskManager) Push(task *Task) (err error) {
 			SetBody(struct {
 				Token   string `json:"token"`
 				Outputs string `json:"outputs"`
+				Warning string `json:"warning"`
+				Error   string `json:"error"`
 			}{
 				task.token,
 				vol.Name,
+				warning,
+				error,
 			}).
 			Put(fmt.Sprintf("/task/%s", task.TaskId))
 

@@ -1,10 +1,18 @@
-.PHONY: clean
-clean:
-	- rm builder
-	- rm executor
+.PHONY: clean executor
 
-builder: clean
+builder:
+	- rm builder
 	go build -o builder ./cmd/builder
 
-executor: clean
-	go build -o executor ./cmd/executor
+
+evaluator:
+	- rm evaluator.exe
+	go env -w GOOS=windows
+	go env -w GOARCH=amd64
+	go build -o evaluator.exe ./cmd/evaluator/cs303
+
+executor:
+	- rm executor
+	go env -w GOOS=linux
+	go env -w GOARCH=amd64
+	go build -o executor ./cmd/executor/cs303

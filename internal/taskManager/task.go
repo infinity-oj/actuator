@@ -31,6 +31,6 @@ type TaskResponse struct {
 
 type TaskManager interface {
 	Fetch(tp string) (*Task, error)
-	Push(task *Task) error
+	Push(task *Task, warning, error string) error
 	Reserve(task *Task) error
 }

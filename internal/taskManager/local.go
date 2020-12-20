@@ -28,7 +28,7 @@ func (l localTaskManager) Reserve(task *Task) error {
 	return nil
 }
 
-func (l localTaskManager) Push(_ *Task) error {
+func (l localTaskManager) Push(_ *Task, a, b string) error {
 	return nil
 }
 
