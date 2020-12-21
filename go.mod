@@ -7,7 +7,7 @@ require (
 	github.com/containerd/containerd v1.4.3 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v20.10.1+incompatible
-	github.com/docker/go-connections v0.4.0
+	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/frankban/quicktest v1.11.2 // indirect
 	github.com/go-resty/resty/v2 v2.3.0
