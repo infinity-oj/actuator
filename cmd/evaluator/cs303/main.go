@@ -70,8 +70,9 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			return "", "output.txt not found"
+		} else {
+			log.Fatal(err)
 		}
-		log.Fatal(err)
 	}
 	str := string(output)
 	outs := strings.Split(str, "\n")

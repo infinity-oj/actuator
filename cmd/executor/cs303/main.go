@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"time"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 
 	"github.com/infinity-oj/actuator/internal/taskManager"
 )
@@ -23,12 +24,6 @@ func isExists(path string) bool {
 		return false
 	}
 	return true
-}
-
-func checkErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func work(env Runtime, task *taskManager.Task) (warning, error string) {
@@ -166,7 +161,11 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 
 	output, err := ioutil.ReadFile(outputPath)
 	if err != nil {
-		log.Fatal(err)
+		if os.IsNotExist(err) {
+			output = []byte{}
+		} else {
+			log.Fatal(err)
+		}
 	}
 
 	task.Outputs = [][]byte{

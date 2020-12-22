@@ -74,10 +74,14 @@ func (e *dockerRuntime) GetVolume(volumeName string) (string, error) {
 func copy(src string, dst string) {
 	// Read all content of src to data
 	data, err := ioutil.ReadFile(src)
-	checkErr(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Write data to dst
 	err = ioutil.WriteFile(dst, data, 0755)
-	checkErr(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (e *dockerRuntime) Setup(task *taskManager.Task) (err error) {
@@ -105,8 +109,6 @@ func (e dockerRuntime) TearDown() {
 		os.Remove(v)
 	}
 	e.volumeMap = make(map[string]string)
-
-
 
 	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.24", nil, nil)
 	if err != nil {
