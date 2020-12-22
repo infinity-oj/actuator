@@ -36,8 +36,8 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 		Resources: container.Resources{
 			Memory:    34359720776 / 2,
 			CPUPeriod: 100000,
-			CPUQuota:  500000,
-			CPUCount:  8,
+			CPUQuota:  1000000,
+			CPUCount:  10,
 		},
 		Mounts: []mount.Mount{
 			{
@@ -178,7 +178,7 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 }
 
 var worker = "executor/cs303"
-var timeout = time.Minute * 20
+var timeout = time.Hour
 
 func main() {
 	tm := taskManager.NewRemoteTaskManager("http://10.20.107.171:2333")
