@@ -1,19 +1,14 @@
 package main
 
 import (
-	"context"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
-	"time"
-
-	"github.com/docker/docker/api/types"
 
 	"github.com/infinity-oj/actuator/internal/volume"
 
-	"github.com/docker/docker/client"
 	"github.com/infinity-oj/actuator/internal/taskManager"
 )
 
@@ -92,7 +87,7 @@ func (e *dockerRuntime) Setup(task *taskManager.Task) (err error) {
 	workingDir, err := e.GetVolume(vol)
 	log.Printf("WorkingDir: %s", workingDir)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	trainDataPath, _ := filepath.Abs("88266789-2bec-4a57-8028-be5a89350102.json")
 	testDataPath, _ := filepath.Abs("5b8ad1e3-abbc-43b1-af6c-f542fded261e.json")
@@ -109,24 +104,6 @@ func (e dockerRuntime) TearDown() {
 		os.Remove(v)
 	}
 	e.volumeMap = make(map[string]string)
-
-	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.24", nil, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	timeout := time.Second * 10
-	containerId := e.GetContainer()
-	err = cli.ContainerStop(context.Background(), containerId, &timeout)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Container %s stopped", containerId)
-
-	err = cli.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Container %s removed", containerId)
 }
 
 func (e dockerRuntime) ReadFile(path string) {

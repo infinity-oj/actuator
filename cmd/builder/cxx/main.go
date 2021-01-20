@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path"
 	"time"
@@ -54,7 +55,7 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 	// cal cmd
 
 	trainTestPath := "train_test.py"
-	trainPath := "/work/train.py"
+	//trainPath := "/work/train.py"
 	testPath := "/work/test.py"
 	pythonPath := "/root/anaconda3/envs/cs303/bin/python"
 	var cmd = ""
@@ -62,11 +63,11 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 	if isExists(path.Join(workingDir, "train_test.py")) {
 		cmd += fmt.Sprintf("%s %s -i %s -t %s", pythonPath, trainTestPath, testDataPath, trainDataPath)
 	} else {
-		useModel := false
-		if isExists(path.Join(workingDir, "train.py")) {
-			cmd += fmt.Sprintf("%s %s -t %s\n", pythonPath, trainPath, trainDataPath)
-			useModel = true
-		}
+		useModel := true
+		//if isExists(path.Join(workingDir, "train.py")) {
+		//	cmd += fmt.Sprintf("%s %s -t %s\n", pythonPath, trainPath, trainDataPath)
+		//	useModel = true
+		//}
 		if isExists(path.Join(workingDir, "test.py")) {
 			if useModel {
 				cmd += fmt.Sprintf("%s %s -i %s -m model", pythonPath, testPath, testDataPath)
@@ -112,7 +113,7 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 		config,
 		hostConfig,
 		nil, nil,
-		fmt.Sprintf("cs303-proj3-%s", task.JudgementId),
+		fmt.Sprintf("cs303-proj3-%s-%d", task.JudgementId, rand.Int()),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -144,13 +145,13 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 
 	data, err := cli.ContainerLogs(ctx, containerId, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
 	_, err = stdcopy.StdCopy(stdout, stderr, data)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	vol := task.Properties["volume"]
@@ -167,6 +168,19 @@ func work(env Runtime, task *taskManager.Task) (warning, error string) {
 			log.Fatal(err)
 		}
 	}
+
+	timeout := time.Second * 10
+	err = cli.ContainerStop(context.Background(), containerId, &timeout)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Container %s stopped", containerId)
+
+	err = cli.ContainerRemove(context.Background(), containerId, types.ContainerRemoveOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Container %s removed", containerId)
 
 	task.Outputs = [][]byte{
 		stdout.Bytes(),
@@ -206,6 +220,12 @@ func main() {
 
 		env := NewRuntime()
 		if err := env.Setup(task); err != nil {
+			if err.Error() == "file not found" {
+				err = tm.Push(task, "", "volume not found")
+				if err != nil {
+					log.Printf("return task error: %s", err.Error())
+				}
+			}
 			log.Printf("setup env error %s", err)
 			continue
 		}

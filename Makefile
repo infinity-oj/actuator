@@ -16,3 +16,4 @@ executor:
 	go env -w GOOS=linux
 	go env -w GOARCH=amd64
 	go build -o executor ./cmd/executor/cs303
+	scp executor ai:~/proj3-executor
