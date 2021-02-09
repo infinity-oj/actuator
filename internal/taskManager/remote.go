@@ -17,7 +17,7 @@ type remoteTaskManager struct {
 	baseUrl string
 }
 
-func (tm *remoteTaskManager) Reserve(task *Task) error {
+func (tm *remoteTaskManager) Reserve(task *models.Task) error {
 	url := fmt.Sprintf("/task/%s/reservation", task.TaskId)
 
 	resp, err := tm.client.R().
@@ -40,7 +40,7 @@ func (tm *remoteTaskManager) Reserve(task *Task) error {
 	return nil
 }
 
-func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
+func (tm *remoteTaskManager) Fetch(tp string) (*models.Task, error) {
 	url := fmt.Sprintf("/task")
 
 	resp, err := tm.client.R().
@@ -56,7 +56,7 @@ func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
 		return nil, nil
 	}
 
-	var data []TaskResponse
+	var data []models.Task
 
 	if err := json.Unmarshal(resp.Body(), &data); err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
 		return nil, err
 	}
 
-	task := &Task{
+	task := &models.Task{
 		JudgementId: tmp.JudgementId,
 		TaskId:      tmp.TaskId,
 		token:       "",
@@ -167,7 +167,7 @@ func (tm *remoteTaskManager) Login(username, password string) error {
 	return nil
 }
 
-func (tm *remoteTaskManager) Push(task *Task, warning, error string) (err error) {
+func (tm *remoteTaskManager) Push(task *models.Task, warning, error string) (err error) {
 
 	fmt.Println("Error:", error)
 

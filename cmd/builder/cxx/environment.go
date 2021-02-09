@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/infinity-oj/server-v2/pkg/models"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,7 +14,7 @@ import (
 )
 
 type Runtime interface {
-	Setup(task *taskManager.Task) error
+	Setup(task *models.Task) error
 	TearDown()
 
 	ReadFile(path string)
@@ -79,7 +80,7 @@ func copy(src string, dst string) {
 	}
 }
 
-func (e *dockerRuntime) Setup(task *taskManager.Task) (err error) {
+func (e *dockerRuntime) Setup(task *models.Task) (err error) {
 
 	vol := task.Properties["volume"]
 	log.Printf("Download volume: %s", vol)

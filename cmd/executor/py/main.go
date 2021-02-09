@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/infinity-oj/server-v2/pkg/models"
 	"io/ioutil"
 	"log"
 	"os"
@@ -77,15 +78,21 @@ func work(taskManager taskManager.TaskManager) {
 	fmt.Println(string(stdOut))
 	fmt.Println(string(stdErr))
 
-	task.Outputs = [][]byte{
-		stdOut,
-		stdErr,
+	task.Outputs = models.Slots{
+		&models.Slot{
+			Type:  "",
+			Value: string(stdOut),
+		},
+		&models.Slot{
+			Type:  "",
+			Value: string(stdErr),
+		},
 	}
 
 	_ = os.Remove(stdout.Name())
 	_ = os.Remove(stderr.Name())
 
-	err = taskManager.Push(task)
+	err = taskManager.Push(task, "", "")
 	if err != nil {
 		log.Fatal(err)
 	}
