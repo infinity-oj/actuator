@@ -114,8 +114,3 @@ func Unzip(src, dest string) error {
 
 	return nil
 }
-
-func UploadVolume(volume, path string) error {
-
-	return nil
-}

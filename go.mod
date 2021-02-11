@@ -2,6 +2,11 @@ module github.com/infinity-oj/actuator
 
 go 1.14
 
+replace (
+	github.com/infinity-oj/server-v2 => ../server-v2
+)
+
+
 require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/containerd/containerd v1.4.3 // indirect

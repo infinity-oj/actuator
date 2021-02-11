@@ -3,10 +3,11 @@ package taskManager
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"strings"
-
 	cookiejar "github.com/juju/persistent-cookiejar"
+	"net/http"
+	"reflect"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/infinity-oj/server-v2/pkg/models"
@@ -17,7 +18,7 @@ type remoteTaskManager struct {
 	baseUrl string
 }
 
-func (tm *remoteTaskManager) Reserve(task *models.Task) error {
+func (tm *remoteTaskManager) Reserve(task *Task) error {
 	url := fmt.Sprintf("/task/%s/reservation", task.TaskId)
 
 	resp, err := tm.client.R().
@@ -36,54 +37,39 @@ func (tm *remoteTaskManager) Reserve(task *models.Task) error {
 		return err
 	}
 
-	task.token = data.Token
+	task.Token = data.Token
 	return nil
 }
 
-func (tm *remoteTaskManager) Fetch(tp string) (*models.Task, error) {
+func (tm *remoteTaskManager) Fetch(tp string) (*Task, error) {
 	url := fmt.Sprintf("/task")
 
+	var data []models.Task
+
 	resp, err := tm.client.R().
-		EnableTrace().
 		SetQueryParam("type", tp).
+		SetResult(&data).
 		Get(url)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if len(resp.Body()) == 0 {
-		return nil, nil
-	}
-
-	var data []models.Task
-
-	if err := json.Unmarshal(resp.Body(), &data); err != nil {
-		return nil, err
+	if resp.StatusCode() != http.StatusOK {
+		return nil, errors.New("request failed")
 	}
 
 	if len(data) == 0 {
 		return nil, nil
 	}
 
-	tmp := data[0]
+	cur := data[0]
 
-	properties := make(map[string]string)
-	err = json.Unmarshal([]byte(tmp.Properties), &properties)
-	if err != nil {
-		return nil, err
+	task := &Task{
+		Task:  cur,
+		Token: "",
 	}
 
-	task := &models.Task{
-		JudgementId: tmp.JudgementId,
-		TaskId:      tmp.TaskId,
-		token:       "",
-		Type:        tmp.Type,
-
-		Properties: properties,
-		Inputs:     strings.Split(tmp.Inputs, ","),
-		Outputs:    [][]byte{},
-	}
 	return task, nil
 }
 
@@ -167,59 +153,44 @@ func (tm *remoteTaskManager) Login(username, password string) error {
 	return nil
 }
 
-func (tm *remoteTaskManager) Push(task *models.Task, warning, error string) (err error) {
+func (tm *remoteTaskManager) Push(task *Task, warning, error string) (err error) {
 
-	fmt.Println("Error:", error)
+	volume, err := tm.CreateVolume()
+	if err != nil {
+		return err
+	}
 
-	if len(task.Outputs) == 1 {
-
-		_, err = tm.client.R().
-			EnableTrace().
-			SetBody(struct {
-				Token   string `json:"token"`
-				Outputs string `json:"outputs"`
-				Warning string `json:"warning"`
-				Error   string `json:"error"`
-			}{
-				task.token,
-				string(task.Outputs[0]),
-				warning,
-				error,
-			}).
-			Put(fmt.Sprintf("/task/%s", task.TaskId))
-
-	} else {
-
-		vol, err := tm.CreateVolume()
-		if err != nil {
-			return err
+	for i, _ := range task.Outputs {
+		slot := task.Outputs[i]
+		if slot.Value == nil {
+			continue
 		}
-
-		for index, output := range task.Outputs {
-			if len(output) == 0 {
-				continue
-			}
-			if err := tm.CreateFile(vol.Name, fmt.Sprintf("%d", index), output); err != nil {
+		if outputBytes, ok := slot.Value.([]byte); ok {
+			filename := fmt.Sprintf("%d", i)
+			if err := tm.CreateFile(volume.Name, filename, outputBytes); err != nil {
 				return err
 			}
+			slot.Type = "file"
+			slot.Value = fmt.Sprintf("%s:%s", volume.Name, filename)
+		} else {
+			slot.Type = reflect.TypeOf(slot.Value).String()
 		}
-
-		_, err = tm.client.R().
-			EnableTrace().
-			SetBody(struct {
-				Token   string `json:"token"`
-				Outputs string `json:"outputs"`
-				Warning string `json:"warning"`
-				Error   string `json:"error"`
-			}{
-				task.token,
-				vol.Name,
-				warning,
-				error,
-			}).
-			Put(fmt.Sprintf("/task/%s", task.TaskId))
-
 	}
+
+	_, err = tm.client.R().
+		EnableTrace().
+		SetBody(struct {
+			Token   string `json:"token"`
+			Outputs string `json:"outputs"`
+			Warning string `json:"warning"`
+			Error   string `json:"error"`
+		}{
+			task.Token,
+			volume.Name,
+			warning,
+			error,
+		}).
+		Put(fmt.Sprintf("/task/%s", task.TaskId))
 
 	return
 }
