@@ -77,10 +77,6 @@ func work(taskManager taskManager.TaskManager) {
 			Type:  "",
 			Value: []byte("bytes from stdout"),
 		},
-		&models.Slot{
-			Type:  "",
-			Value: "something else",
-		},
 	}
 	//
 	//_ = os.Remove(stdout.Name())

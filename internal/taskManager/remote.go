@@ -177,21 +177,36 @@ func (tm *remoteTaskManager) Push(task *Task, warning, error string) (err error)
 		}
 	}
 
-	_, err = tm.client.R().
+	resp, err := tm.client.R().
 		EnableTrace().
+		SetPathParams(map[string]string{
+			"taskId": task.TaskId,
+		}).
 		SetBody(struct {
 			Token   string `json:"token"`
-			Outputs string `json:"outputs"`
 			Warning string `json:"warning"`
 			Error   string `json:"error"`
+
+			Outputs models.Slots `json:"outputs"`
 		}{
 			task.Token,
-			volume.Name,
 			warning,
 			error,
+			task.Outputs,
 		}).
-		Put(fmt.Sprintf("/task/%s", task.TaskId))
+		Put("/task/{taskId}")
 
+	// Explore response object
+	fmt.Println("Response Info:")
+	fmt.Println("  ", resp.Request.URL)
+	fmt.Println("  Error      :", err)
+	fmt.Println("  Status Code:", resp.StatusCode())
+	fmt.Println("  Status     :", resp.Status())
+	fmt.Println("  Proto      :", resp.Proto())
+	fmt.Println("  Time       :", resp.Time())
+	fmt.Println("  Received At:", resp.ReceivedAt())
+	fmt.Println("  Body       :\n", resp)
+	fmt.Println()
 	return
 }
 
